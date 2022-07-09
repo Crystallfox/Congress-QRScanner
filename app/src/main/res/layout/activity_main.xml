@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swiper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+      <androidx.constraintlayout.widget.ConstraintLayout
+          android:layout_width="match_parent"
+          android:layout_height="match_parent">
+
+          <ImageView
+              android:id="@+id/CirculoColor"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              app:layout_constraintBottom_toTopOf="@id/btnScanner"
+              app:layout_constraintEnd_toEndOf="parent"
+              app:layout_constraintStart_toStartOf="parent"
+              app:srcCompat="@drawable/ic_baseline_circle_24" />
+
+          <TextView
+              android:id="@+id/txt_mensaje"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:text=""
+              android:textSize="26sp"
+              android:textAlignment="center"
+              app:layout_constraintEnd_toEndOf="parent"
+              app:layout_constraintStart_toStartOf="parent"
+              app:layout_constraintTop_toTopOf="parent" />
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="0dp"
+              android:layout_margin="15dp"
+              android:layout_marginTop="125dp"
+              android:gravity="center"
+              android:orientation="vertical"
+              app:layout_constraintBottom_toTopOf="@id/CirculoColor"
+              app:layout_constraintEnd_toEndOf="parent"
+              app:layout_constraintStart_toStartOf="parent"
+              app:layout_constraintTop_toBottomOf="@+id/txt_mensaje">
+
+              <Button
+                  android:id="@+id/btnExportar"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center"
+                  android:text="Exportar Asistencia"
+                  android:layout_marginBottom="50dp"
+                  app:layout_constraintBottom_toBottomOf="parent"
+                  app:layout_constraintEnd_toEndOf="parent"
+                  app:layout_constraintStart_toStartOf="parent"/>
+
+              <ImageView
+                  android:id="@+id/img_anuncio"
+                  android:layout_width="200dp"
+                  android:layout_height="200dp"
+                  app:srcCompat="@drawable/ic_baseline_error_24" />
+
+              <TextView
+                  android:id="@+id/txt_nombre"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="Nombre:"
+                  android:visibility="gone"
+                  android:textSize="20sp" />
+
+              <TextView
+                  android:id="@+id/txt_institucion"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="Institución"
+                  android:visibility="gone"
+                  android:textSize="20sp" />
+
+              <TextView
+                  android:id="@+id/txt_taller1"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="Taller 1"
+                  android:visibility="gone"
+                  android:textSize="20sp" />
+
+              <TextView
+                  android:id="@+id/txt_taller2"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="Taller 2"
+                  android:visibility="gone"
+                  android:textSize="20sp" />
+
+          </LinearLayout>
+
+          <Button
+              android:id="@+id/btnScanner"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="center"
+              android:text="Escanear código"
+              android:layout_marginBottom="50dp"
+              app:layout_constraintBottom_toBottomOf="parent"
+              app:layout_constraintEnd_toEndOf="parent"
+              app:layout_constraintStart_toStartOf="parent"/>
+
+      </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
