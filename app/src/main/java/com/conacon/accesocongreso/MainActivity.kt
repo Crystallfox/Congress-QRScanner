@@ -3,14 +3,13 @@ package com.conacon.accesocongreso
 import android.content.*
 import android.graphics.Color
 import android.net.ConnectivityManager
-import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.FileProvider
 import com.conacon.accesocongreso.Models.Asistente
 import com.conacon.accesocongreso.Models.ListaPagadosModel
 import com.conacon.accesocongreso.Models.TallerModel
@@ -22,14 +21,15 @@ import com.google.gson.reflect.TypeToken
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
 import com.journeyapps.barcodescanner.ScanOptions
+import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
 import java.net.UnknownHostException
-import java.time.LocalDateTime
+import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
@@ -38,29 +38,86 @@ class MainActivity : AppCompatActivity() {
     private var ListaPagos = ArrayList<ListaPagadosModel>()
     private var ListaAsistencias = ArrayList<Asistente>()
     private lateinit var binding: ActivityMainBinding
+    private var currentEvent = 0;
+    private  var eventsArray = ArrayList<String>()
+    private var idsArray = ArrayList<String>()
+    private var imageArray = ArrayList<String>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         Savings = getPreferences(MODE_PRIVATE)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        binding.btnScanner.setOnClickListener {
+        binding.btnScanner.setOnClickListener{
             setVacios()
             initScanner()
         }
         binding.swiper.setOnRefreshListener {
-            binding.swiper.isRefreshing = true
-            getListaPagados()
+            binding.swiper.isRefreshing = false
+            //getListaPagados()
         }
-        binding.btnExportar.setOnClickListener {
+        binding.btnExportar.setOnClickListener{
             exportarAsistencias()
         }
-        getListaPagados()
+        //getListaPagados()
+        cargarEventos()
         cargarAsistencias()
+        binding.SpinnerEvento.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                currentEvent = position
+                Picasso.get().load(imageArray.get(position)).into(binding.imagenEvento)
+            }
+
+        }
+    }
+    private fun cargarEventos(){
+        if(isNetworkAvailable()) {
+            try {
+                val retrofit = ServiceBuilder.buildService(RestApi::class.java)
+                CoroutineScope(Dispatchers.Main).launch {
+                    val cert = retrofit.consultaEventos(
+                        action = "consulta_eventos_scanner"
+                    )
+                    eventsArray = ArrayList<String>()
+                    idsArray = ArrayList<String>()
+                    imageArray = ArrayList<String>()
+                    ////Si la conexión fué exitosa
+                    if (cert.isSuccessful && cert.body()!!.data != null) {
+                        var datas = cert.body()!!.data!!
+                        datas.forEach {
+                            eventsArray.add(it.titulo)
+                            val img = "https://moni.com.mx/assets/images/generales/flyers/"+it.imagen
+                            imageArray.add(img)
+                            idsArray.add(it.idEvento)
+                        }
+                    }//Si falla, hace la consulta local
+
+                    val contxaux = this@MainActivity.ctx
+                    if(contxaux != null) {
+                        val adapter = ArrayAdapter(
+                            contxaux,
+                            R.layout.spinner_texto, eventsArray
+                        )
+                        binding.SpinnerEvento.adapter = adapter
+                    }
+                }
+                //Si la respuesta no cumple con la estructura
+            } catch (e: Exception) {
+                print(e)
+                //checkLocal(id_prospecto)
+            } catch (e: UnknownHostException) {
+                print(e)
+                //checkLocal(id_prospecto)
+            }
+        }
     }
     private fun initScanner(){
         val options = ScanOptions()
-        options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+        options.setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
         options.setPrompt("Escanear código")
         options.setCameraId(0) // Use a specific camera of the device
         options.setBeepEnabled(true)
@@ -85,114 +142,102 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkAsistencia(id_prospecto: String){
         setVacios()
+        var ev = idsArray.get(currentEvent)
         if(isNetworkAvailable()) {
             try {
                 val retrofit = ServiceBuilder.buildService(RestApi::class.java)
                 CoroutineScope(Dispatchers.Main).launch {
                     val cert = retrofit.registroAsistencia(
                         id_afiliado = id_prospecto,
-                        action = "consultar_alumno",
-                        idEvento = "72"
+                        action = "check-congreso",
+                        idEvento = idsArray.get(currentEvent)
                     )
                     ////Si la conexión fué exitosa
-                    if (cert.isSuccessful) {
+                    if (cert.isSuccessful && cert.body()!!.evento != null) {
                         var datas = cert.body()
                         ///Si tiene autorizado el acceso
                         if (datas!!.evento.acceso) {
                             setPositivo(
-                                datas.persona.instituciones[0].color,
+                                //datas.persona.instituciones[0].color,
                                 datas.persona.nombre,
                                 datas.persona.aPaterno,
                                 datas.persona.aMaterno,
-                                datas.persona.instituciones[0].nombre,
-                                datas.talleres,
-                                datas.evento.mensaje
+                                datas.evento.mensaje?: "Acceso correcto",
+                                datas.persona.instituciones[0].color,
+                                datas.persona.instituciones[0].nombre
                             )
-                            guardaAsistencia(id_prospecto)
+                            guardaAsistencia(id_prospecto,ev,"1")
                         }///Si no tiene autorizado el acceso
                         else {
                             setnegativo(
-                                datas.persona.instituciones[0].color,
+                                //datas.persona.instituciones[0].color,
                                 datas.persona.nombre,
                                 datas.persona.aPaterno,
                                 datas.persona.aMaterno,
-                                datas.persona.instituciones[0].nombre,
-                                datas.talleres,
-                                datas.evento.mensaje
+                                //datas.persona.instituciones[0].nombre,
+                                datas.evento.mensaje?: "Sin acceso permitido",
+                                datas.persona.instituciones[0].color,
+                                datas.persona.instituciones[0].nombre
                             )
                         }
                     }//Si falla, hace la consulta local
                     else {
-                        checkLocal(id_prospecto)
+                       // checkLocal(id_prospecto)
+                        setnegativo("QR no válido",
+                        "","","QR No Válido","#000000","Sin lectura de institución")
                     }
                 }
                 //Si la respuesta no cumple con la estructura
             } catch (e: Exception) {
                 print(e)
-                checkLocal(id_prospecto)
+                //checkLocal(id_prospecto)
             } catch (e: UnknownHostException) {
                 print(e)
-                checkLocal(id_prospecto)
+                //checkLocal(id_prospecto)
+                guardaAsistencia(id_prospecto,ev,"0")
             }
         }
         else{
-            checkLocal(id_prospecto)
+           // checkLocal(id_prospecto)
         }
     }
 
-    fun setPositivo(color: String, nombre: String, apa: String, ama: String, institucion: String, talleres: Array<TallerModel>?, mensaje: String){
-        binding.imgAnuncio.setImageResource(R.drawable.ic_baseline_check_circle_24)
-        binding.txtNombre.text = "${nombre} ${apa} ${ama}"
-        binding.txtInstitucion.text = institucion
-        if(talleres != null && talleres.size==1){
-            binding.txtTaller1.text = talleres[0].nombre_taller
-            binding.txtTaller2.visibility = View.GONE
-        }else{
-            if(talleres !=null && talleres.size==2){
-                binding.txtTaller2.visibility = View.VISIBLE
-                binding.txtTaller1.text = talleres[0].nombre_taller
-                binding.txtTaller2.text = talleres[1].nombre_taller
-            }
-            else{
-                binding.txtTaller1.text = "Sin talleres registrados"
-                binding.txtTaller2.visibility = View.GONE
-            }
+    fun setPositivo(nombre: String, apa: String, ama: String, mensaje: String, color: String, institucion: String){
+        try {
+            binding.imgAnuncio.setImageResource(R.drawable.ic_baseline_check_circle_24)
+            binding.txtNombre.text = "${nombre} ${apa} ${ama}"
+            binding.txtNombre.visibility = View.VISIBLE
+            binding.txtInstitucion.text = institucion
+            binding.txtInstitucion.visibility = View.VISIBLE
+            binding.CirculoColor.setColorFilter(Color.parseColor(color))
+            binding.txtMensaje.text = mensaje
+        }catch (e: Exception){
+            Toast.makeText(this, "Acceso correcto, intente de nuevo para obtener el nombre", Toast.LENGTH_LONG).show()
         }
-        binding.CirculoColor.setColorFilter(Color.parseColor(color))
-        binding.txtMensaje.text = mensaje
     }
 
-    fun setnegativo(color: String, nombre: String, apa: String, ama: String, institucion: String, talleres: Array<TallerModel>?, mensaje: String){
-        binding.imgAnuncio.setImageResource(R.drawable.ic_baseline_error_24)
-        binding.txtNombre.text = "${nombre} ${apa} ${ama}"
-        binding.txtInstitucion.text = institucion
-        binding.txtInstitucion.visibility = View.VISIBLE
-        binding.txtNombre.visibility = View.VISIBLE
-        if(talleres != null && talleres.size==1){
-            binding.txtTaller1.text = talleres[0].nombre_taller
-            binding.txtTaller2.visibility = View.GONE
-        }else{
-            if(talleres != null && talleres.size==2){
-                binding.txtTaller1.visibility = View.VISIBLE
-                binding.txtTaller2.visibility = View.VISIBLE
-                binding.txtTaller1.text = talleres[0].nombre_taller
-                binding.txtTaller2.text = talleres[1].nombre_taller
-            }
-            else{
-                binding.txtTaller1.text = "Sin talleres registrados"
-                binding.txtTaller2.visibility = View.GONE
-            }
+    fun setnegativo(nombre: String, apa: String, ama: String, mensaje: String, color: String, institucion: String){
+        try {
+            binding.imgAnuncio.setImageResource(R.drawable.ic_baseline_error_24)
+            binding.txtNombre.text = "${nombre} ${apa} ${ama}"
+            binding.txtInstitucion.text = institucion
+            binding.txtInstitucion.visibility = View.VISIBLE
+            binding.txtNombre.visibility = View.VISIBLE
+
+            binding.CirculoColor.setColorFilter(Color.parseColor(color))
+            binding.txtMensaje.text = mensaje
+        }catch (e: Exception){
+            Toast.makeText(this, "Acceso incorrecto, intente de nuevo para obtener el nombre", Toast.LENGTH_LONG).show()
         }
-        binding.CirculoColor.setColorFilter(Color.parseColor(color))
-        binding.txtMensaje.text = mensaje
     }
 
-    fun guardaAsistencia(id_prospecto: String){
+    fun guardaAsistencia(id_prospecto: String, evento: String, validado: String){
         val prefsEditor: SharedPreferences.Editor = Savings.edit()
-        val current = LocalDateTime.now()
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        val formatted = current.format(formatter)
-        val obj = Asistente(id_prospecto, formatted)
+        val d = Date(Date().getTime())
+        val s: String = SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(d)
+        /*val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val formatted = current.format(formatter)*/
+        val obj = Asistente(id_prospecto, s, evento, validado)
         ListaAsistencias.add(obj)
         val gson = Gson()
         val json = gson.toJson(ListaAsistencias)
@@ -201,15 +246,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun checkLocal(id_prospecto: String){
-        cargarPagadosLocal()
+        //cargarPagadosLocal()
         ListaPagos.forEach {
             if(it.id_pospecto == id_prospecto){
-                setPositivo(it.color,it.nombre, it.apa, it.ama, "", null, "Acceso correcto")
-                guardaAsistencia(it.id_pospecto)
+                setPositivo(it.nombre, it.apa, it.ama,  "Acceso correcto", it.color?:"#FFFFFF", it.Carrera?:"Vacio")
+                //guardaAsistencia(it.id_pospecto)
                 return
             }
         }
-        setnegativo("#ffffff","Sin nombre", "", "", "", null, "Acceso Incorrecto")
+        setnegativo("Sin nombre", "", "",  "Acceso Incorrecto", "#FFFFFF", "Vacio")
     }
     fun guardarPagadosLocal(Lista: ArrayList<ListaPagadosModel>){
         val prefsEditor: SharedPreferences.Editor = Savings.edit()
@@ -223,7 +268,11 @@ class MainActivity : AppCompatActivity() {
         val gson = Gson()
         val json: String = Savings.getString("Pagados", "")!!
         val typeToken = object : TypeToken<ArrayList<ListaPagadosModel>>() {}.type
-        ListaPagos = Gson().fromJson<ArrayList<ListaPagadosModel>>(json, typeToken)
+        try {
+            ListaPagos = Gson().fromJson<ArrayList<ListaPagadosModel>>(json, typeToken)
+        }catch(e: Exception){
+            ListaPagos = ArrayList<ListaPagadosModel>()
+        }
     }
 
     fun getListaPagados(){
@@ -244,27 +293,27 @@ class MainActivity : AppCompatActivity() {
                                 ListaPagos.add(it)
                             }
                             //print(ListaPagos)
-                            guardarPagadosLocal(ListaPagos)
+                            //guardarPagadosLocal(ListaPagos)
                             avisaerror("Lista Actualizada", "La lista se actualizó correctamente")
                         }///Si no tiene autorizado el acceso
                         else{
                             avisaerror("Error al actualziar lista", "El servidor retornouna lista vacía")
-                            cargarPagadosLocal()
+                            //cargarPagadosLocal()
                         }
                     }//Si falla, hace la consulta local
                     else{
                         avisaerror("Error al actualziar lista", "El servidor retorno un error 500")
-                        cargarPagadosLocal()
+                       // cargarPagadosLocal()
                     }
                 }
                 //Si la respuesta no cumple con la estructura
             }catch(e: Exception){
                 avisaerror("Error al actualziar lista", "El servidor retorno un formato de JSON distinto")
-                cargarPagadosLocal()
+               // cargarPagadosLocal()
             }
         }else{
             avisaerror("Error al actualziar lista", "El servidor retorno un error 500")
-            cargarPagadosLocal()
+           // cargarPagadosLocal()
         }
         binding.swiper.isRefreshing = false
     }
@@ -322,7 +371,11 @@ class MainActivity : AppCompatActivity() {
     fun cargarAsistencias(){
         val json: String = Savings.getString("Asistencias", "")!!
         val typeToken = object : TypeToken<ArrayList<Asistente>>() {}.type
-        ListaAsistencias = Gson().fromJson<ArrayList<Asistente>>(json, typeToken)
+        try {
+            ListaAsistencias = Gson().fromJson<ArrayList<Asistente>>(json, typeToken)
+        }catch(e: Exception){
+            ListaAsistencias = ArrayList<Asistente>()
+        }
     }
     private fun pasteTextFromClipboard(texto: String) {
         val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

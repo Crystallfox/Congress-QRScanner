@@ -15,8 +15,8 @@
 
           <ImageView
               android:id="@+id/CirculoColor"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
+              android:layout_width="120dp"
+              android:layout_height="120dp"
               app:layout_constraintBottom_toTopOf="@id/btnScanner"
               app:layout_constraintEnd_toEndOf="parent"
               app:layout_constraintStart_toStartOf="parent"
@@ -31,19 +31,40 @@
               android:textAlignment="center"
               app:layout_constraintEnd_toEndOf="parent"
               app:layout_constraintStart_toStartOf="parent"
-              app:layout_constraintTop_toTopOf="parent" />
+              app:layout_constraintTop_toBottomOf="@id/imagenEvento" />
+          <Spinner
+              android:id="@+id/SpinnerEvento"
+              android:layout_width="match_parent"
+              android:layout_height="40dp"
+              android:layout_marginStart="25dp"
+              android:layout_marginEnd="25dp"
+              app:layout_constraintTop_toTopOf="parent"
+              app:layout_constraintEnd_toEndOf="parent"
+              app:layout_constraintStart_toStartOf="parent"
+              />
+
+          <ImageView
+              android:id="@+id/imagenEvento"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="10dp"
+              android:maxHeight="90dp"
+              android:scaleType="fitCenter"
+              app:layout_constraintTop_toBottomOf="@id/SpinnerEvento"
+              app:layout_constraintEnd_toEndOf="parent"
+              app:layout_constraintStart_toStartOf="parent" />
 
           <LinearLayout
               android:layout_width="match_parent"
               android:layout_height="0dp"
               android:layout_margin="15dp"
-              android:layout_marginTop="125dp"
+              android:layout_marginTop="10dp"
               android:gravity="center"
               android:orientation="vertical"
               app:layout_constraintBottom_toTopOf="@id/CirculoColor"
               app:layout_constraintEnd_toEndOf="parent"
               app:layout_constraintStart_toStartOf="parent"
-              app:layout_constraintTop_toBottomOf="@+id/txt_mensaje">
+              app:layout_constraintTop_toBottomOf="@+id/imagenEvento">
 
               <Button
                   android:id="@+id/btnExportar"
@@ -51,15 +72,15 @@
                   android:layout_height="wrap_content"
                   android:layout_gravity="center"
                   android:text="Exportar Asistencia"
-                  android:layout_marginBottom="50dp"
+                  android:layout_marginBottom="10dp"
                   app:layout_constraintBottom_toBottomOf="parent"
                   app:layout_constraintEnd_toEndOf="parent"
                   app:layout_constraintStart_toStartOf="parent"/>
 
               <ImageView
                   android:id="@+id/img_anuncio"
-                  android:layout_width="200dp"
-                  android:layout_height="200dp"
+                  android:layout_width="120dp"
+                  android:layout_height="120dp"
                   app:srcCompat="@drawable/ic_baseline_error_24" />
 
               <TextView
@@ -67,6 +88,7 @@
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:text="Nombre:"
+                  android:textAlignment="center"
                   android:visibility="gone"
                   android:textSize="20sp" />
 
@@ -75,6 +97,7 @@
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:text="Institución"
+                  android:textAlignment="center"
                   android:visibility="gone"
                   android:textSize="20sp" />
 
@@ -83,6 +106,7 @@
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:text="Taller 1"
+                  android:textAlignment="center"
                   android:visibility="gone"
                   android:textSize="20sp" />
 
@@ -91,6 +115,7 @@
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:text="Taller 2"
+                  android:textAlignment="center"
                   android:visibility="gone"
                   android:textSize="20sp" />
 

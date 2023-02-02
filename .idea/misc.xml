@@ -4,9 +4,13 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/Sistemas 1/AndroidStudioProjects/AccesoCongreso/app/src/main/res/drawable-v24/ic_baseline_check_circle_24.xml" value="0.194" />
+        <entry key="..\:/Users/Sistemas 1/AndroidStudioProjects/AccesoCongreso/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.175" />
         <entry key="..\:/Users/Sistemas 1/AndroidStudioProjects/AccesoCongreso/app/src/main/res/drawable/ic_baseline_check_circle_24.xml" value="0.223" />
         <entry key="..\:/Users/Sistemas 1/AndroidStudioProjects/AccesoCongreso/app/src/main/res/drawable/ic_baseline_circle_24.xml" value="0.223" />
+        <entry key="..\:/Users/Sistemas 1/AndroidStudioProjects/AccesoCongreso/app/src/main/res/drawable/ic_launcher_background.xml" value="0.175" />
         <entry key="..\:/Users/Sistemas 1/AndroidStudioProjects/AccesoCongreso/app/src/main/res/layout/activity_main.xml" value="0.264" />
+        <entry key="..\:/Users/Sistemas 1/AndroidStudioProjects/AccesoCongreso/app/src/main/res/layout/spinner_texto.xml" value="0.18489583333333334" />
+        <entry key="..\:/Users/Sistemas 1/AppData/Local/Android/Sdk/platforms/android-31/data/res/layout/simple_spinner_item.xml" value="0.1859375" />
       </map>
     </option>
   </component>

@@ -4,21 +4,19 @@ import com.google.gson.annotations.SerializedName
 
 class ResponseModel(
     @SerializedName("evento") val evento: EventoModel,
-    @SerializedName("persona") val persona: PersonaModel,
-    @SerializedName("talleres") val talleres:Array<TallerModel>
+    @SerializedName("persona") val persona: PersonaModel
 )
 
 class EventoModel(
     @SerializedName("acceso") val acceso:Boolean,
-    @SerializedName("asistencia") val asistencia:Boolean,
-    @SerializedName("mensaje") val mensaje:String
+    @SerializedName("mensaje") val mensaje:String?
 )
 class PersonaModel(
-    @SerializedName("aMaterno") val aMaterno: String,
-    @SerializedName("aPaterno") val aPaterno: String,
-    @SerializedName("email") val email: String,
+    @SerializedName("amaterno") val aMaterno: String,
+    @SerializedName("apaterno") val aPaterno: String,
+    @SerializedName("email") val email: String?,
     @SerializedName("nombre") val nombre: String,
-    @SerializedName("instituciones") val instituciones: Array<InstitucionModel>
+    @SerializedName("instituciones") val instituciones: List<InstitucionModel>
 )
 
 class InstitucionModel(

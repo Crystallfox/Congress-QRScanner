@@ -2,6 +2,7 @@ package com.conacon.accesocongreso.responses
 
 import com.conacon.accesocongreso.Models.ListaPagadosModel
 import com.conacon.accesocongreso.Models.ResponseModel
+import com.conacon.accesocongreso.Models.eventoResponseModel
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import okhttp3.MultipartBody
@@ -25,4 +26,10 @@ interface RestApi {
         @Field("action") action: String,
         @Field("eventoid") idEvento: String
     ): Response<ResponseModel>
+
+    @FormUrlEncoded
+    @POST("consultas_android/Control.php")
+    suspend fun consultaEventos(
+        @Field("action")action: String
+    ): Response<eventoResponseModel>
 }

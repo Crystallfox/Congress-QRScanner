@@ -4,6 +4,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\Sistemas 1\\Desktop\\Keys Apps Android\\KeyAccesoCongresoConacon\\accesoCongreso.jks')
+            storePassword 'conde20192'
+            keyAlias 'key0'
+            keyPassword 'conde20192'
+        }
+    }
     compileSdk 31
 
     viewBinding {
@@ -17,8 +25,8 @@ android {
         applicationId "com.conacon.accesocongreso"
         minSdk 24
         targetSdk 31
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName '1.01'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -27,6 +35,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -39,6 +48,9 @@ android {
     }
     buildFeatures {
         viewBinding true
+    }
+    productFlavors{
+
     }
 }
 
@@ -55,6 +67,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation "com.squareup.picasso:picasso:2.71828"
 
     //Lector QR
     implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
