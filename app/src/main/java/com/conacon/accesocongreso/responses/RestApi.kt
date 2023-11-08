@@ -2,6 +2,7 @@ package com.conacon.accesocongreso.responses
 
 import com.conacon.accesocongreso.Models.ListaPagadosModel
 import com.conacon.accesocongreso.Models.ResponseModel
+import com.conacon.accesocongreso.Models.ResponseTallerModel
 import com.conacon.accesocongreso.Models.eventoResponseModel
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
@@ -32,4 +33,11 @@ interface RestApi {
     suspend fun consultaEventos(
         @Field("action")action: String
     ): Response<eventoResponseModel>
+
+    @FormUrlEncoded
+    @POST("consultas_android/Control.php")
+    suspend fun getTalleres(
+        @Field("action")action: String,
+        @Field("id_evento")id_evento: String
+    ): Response<ResponseTallerModel>
 }

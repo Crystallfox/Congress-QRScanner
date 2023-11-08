@@ -1,5 +1,6 @@
 package com.conacon.accesocongreso
 
+import android.app.AlertDialog
 import android.content.*
 import android.graphics.Color
 import android.net.ConnectivityManager
@@ -41,6 +42,8 @@ class MainActivity : AppCompatActivity() {
     private var currentEvent = 0;
     private  var eventsArray = ArrayList<String>()
     private var idsArray = ArrayList<String>()
+    private  var talleresArray = ArrayList<String>()
+    private var tallerclaveArray = ArrayList<String>()
     private var imageArray = ArrayList<String>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,10 +73,21 @@ class MainActivity : AppCompatActivity() {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 currentEvent = position
                 Picasso.get().load(imageArray.get(position)).into(binding.imagenEvento)
+                cargarTalleres(idsArray.get(currentEvent))
             }
 
         }
     }
+
+    private fun cargarTalleres(id_evento:String){
+        talleresArray.add("Asistencia General")
+        val adapter = ArrayAdapter(
+            this,
+            R.layout.spinner_texto, talleresArray
+        )
+        binding.SpinnerTalleres.adapter = adapter
+    }
+
     private fun cargarEventos(){
         if(isNetworkAvailable()) {
             try {
@@ -103,6 +117,7 @@ class MainActivity : AppCompatActivity() {
                             R.layout.spinner_texto, eventsArray
                         )
                         binding.SpinnerEvento.adapter = adapter
+                        cargarTalleres(idsArray.get(0))
                     }
                 }
                 //Si la respuesta no cumple con la estructura
@@ -164,7 +179,8 @@ class MainActivity : AppCompatActivity() {
                                 datas.persona.aMaterno,
                                 datas.evento.mensaje?: "Acceso correcto",
                                 datas.persona.instituciones[0].color,
-                                datas.persona.instituciones[0].nombre
+                                datas.persona.instituciones[0].nombre,
+                                datas.persona.kit
                             )
                             guardaAsistencia(id_prospecto,ev,"1")
                         }///Si no tiene autorizado el acceso
@@ -202,7 +218,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun setPositivo(nombre: String, apa: String, ama: String, mensaje: String, color: String, institucion: String){
+    fun setPositivo(nombre: String, apa: String, ama: String, mensaje: String, color: String, institucion: String, kit: String?){
         try {
             binding.imgAnuncio.setImageResource(R.drawable.ic_baseline_check_circle_24)
             binding.txtNombre.text = "${nombre} ${apa} ${ama}"
@@ -211,9 +227,24 @@ class MainActivity : AppCompatActivity() {
             binding.txtInstitucion.visibility = View.VISIBLE
             binding.CirculoColor.setColorFilter(Color.parseColor(color))
             binding.txtMensaje.text = mensaje
+            if(kit != null) {
+                var mensaje = if(kit!! == "1")  "Entregar Kit" else "Kit ya entregado"
+                mostrarDialogo(mensaje = mensaje)
+            }
         }catch (e: Exception){
             Toast.makeText(this, "Acceso correcto, intente de nuevo para obtener el nombre", Toast.LENGTH_LONG).show()
         }
+    }
+
+    fun mostrarDialogo(mensaje: String){
+        val builder = AlertDialog.Builder(this, androidx.appcompat.R.style.AlertDialog_AppCompat)
+        builder.setMessage(mensaje)
+            .setCancelable(false)
+            .setPositiveButton("Aceptar") { dialog, id ->
+                // Delete selected note from database
+            }
+        val alert = builder.create()
+        alert.show()
     }
 
     fun setnegativo(nombre: String, apa: String, ama: String, mensaje: String, color: String, institucion: String){
@@ -249,7 +280,7 @@ class MainActivity : AppCompatActivity() {
         //cargarPagadosLocal()
         ListaPagos.forEach {
             if(it.id_pospecto == id_prospecto){
-                setPositivo(it.nombre, it.apa, it.ama,  "Acceso correcto", it.color?:"#FFFFFF", it.Carrera?:"Vacio")
+                setPositivo(it.nombre, it.apa, it.ama,  "Acceso correcto", it.color?:"#FFFFFF", it.Carrera?:"Vacio",null)
                 //guardaAsistencia(it.id_pospecto)
                 return
             }
